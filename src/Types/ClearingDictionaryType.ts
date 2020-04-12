@@ -1,5 +1,5 @@
-import { ClearingType } from "./ClearingType";
+import { Clearing } from "./ClearingType";
 
 export type ClearingDictionaryType = {
-    [key: string]: ClearingType;
+    [key: string]: Clearing;
   }

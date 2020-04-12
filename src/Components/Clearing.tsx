@@ -8,29 +8,39 @@ import catWarriorImage from '../Assets/catWarrior.png';
 import allianceWarriorImage from '../Assets/allianceWarrior.png';
 
 export interface IClearingProps {
+    id: string,
     top: number;
     left: number;
     type: ClearingTypeEnum;
     hasSupportToken: boolean;
     woodTokens: number;
     hasKeepToken: boolean;
+    hasWagabond: boolean;
+    catWarriorsNumber: number;
+    birdWarriorsNumber: number;
+    allianceWarriorsNumber: number;
+    onClearingClick(id: string, mouseX: number, mouseY: number): void;
 }
 
 export interface IClearingState {
-    tokenBarWidth: string;
-    tokenBarHeight: string;
+    tokenBarWidth: number;
+    tokenBarHeight: number;
+    tokenBarLeft: number;
     tokenBarColor: string | undefined;
     tokenBarZIndex: number | undefined;
-    warriorBarWidth: string;
-    warriorBarHeight: string;
+    warriorBarWidth: number;
+    warriorBarHeight: number;
     warriorBarColor: string | undefined;
     warriorBarZIndex: number | undefined;
     woodQuantityDisplay: 'initial' | 'none';
     warriorQuantityDisplay: 'initial' | 'none';
+    warriorBarTop: number;
+    warriorImageClasses: string | undefined;
 }
 
-export class Clearing extends React.Component<IClearingProps, IClearingState>{
+const clearingHeight = 13;
 
+export class ClearingComponent extends React.Component<IClearingProps, IClearingState>{
     constructor(props: IClearingProps) {
         super(props)
         this.onClearingClick = this.onClearingClick.bind(this);
@@ -40,33 +50,46 @@ export class Clearing extends React.Component<IClearingProps, IClearingState>{
         this.onWarriorBarMouseLeave = this.onWarriorBarMouseLeave.bind(this);
 
         this.state = {
-            tokenBarWidth: '12%',
-            tokenBarHeight: '3%',
+            tokenBarLeft: props.left,
+            tokenBarWidth: 12,
+            tokenBarHeight: 3,
             tokenBarColor: undefined,
             tokenBarZIndex: undefined,
-            warriorBarWidth: '3%',
-            warriorBarHeight: '12%',
+            warriorBarWidth: 3,
+            warriorBarHeight: clearingHeight,
             warriorBarColor: undefined,
             warriorBarZIndex: undefined,
             woodQuantityDisplay: 'none',
-            warriorQuantityDisplay: 'none'
+            warriorQuantityDisplay: 'none',
+            warriorBarTop: props.top,
+            warriorImageClasses: 'w-100'
         };
     }
 
     onTokenBarMouseMove = () => {
-        this.setState({
-            tokenBarWidth: '23%',
-            tokenBarHeight: '7%',
-            tokenBarColor: '#bfae86',
-            tokenBarZIndex: 1,
-            woodQuantityDisplay: 'initial'
-        });
+        if (this.props.hasKeepToken || this.props.hasSupportToken || this.props.woodTokens > 0) {
+            let tokenBarWidth = 23;
+            let tokenBarLeft = this.state.tokenBarLeft;
+            if (tokenBarLeft + tokenBarWidth > 100) {
+                tokenBarLeft += 100 - this.props.left - tokenBarWidth;
+            }
+
+            this.setState({
+                tokenBarLeft: tokenBarLeft,
+                tokenBarWidth: tokenBarWidth,
+                tokenBarHeight: 7,
+                tokenBarColor: '#bfae86',
+                tokenBarZIndex: 1,
+                woodQuantityDisplay: 'initial'
+            });
+        }
     }
 
     onTokenBarMouseLeave = () => {
         this.setState({
-            tokenBarWidth: '12%',
-            tokenBarHeight: '3%',
+            tokenBarLeft: this.props.left,
+            tokenBarWidth: 12,
+            tokenBarHeight: 3,
             tokenBarColor: undefined,
             tokenBarZIndex: undefined,
             woodQuantityDisplay: 'none'
@@ -74,26 +97,39 @@ export class Clearing extends React.Component<IClearingProps, IClearingState>{
     }
 
     onWarriorBarMouseMove = () => {
-        this.setState({
-            warriorBarWidth: '7%',
-            warriorBarHeight: '23%',
-            warriorBarColor: '#bfae86',
-            warriorBarZIndex: 1,
-            warriorQuantityDisplay: 'initial'
-        });
+        if (this.props.catWarriorsNumber > 0 || this.props.birdWarriorsNumber > 0 || this.props.allianceWarriorsNumber > 0) {
+            const warriorBarHeight = 23;
+            let warriorBarTop = this.state.warriorBarTop;
+            if (warriorBarTop + warriorBarHeight > 100) {
+                warriorBarTop += 100 - this.props.top - warriorBarHeight;
+            }
+
+            this.setState({
+                warriorBarWidth: 7,
+                warriorBarHeight: warriorBarHeight,
+                warriorBarColor: '#bfae86',
+                warriorBarZIndex: 1,
+                warriorQuantityDisplay: 'initial',
+                warriorBarTop: warriorBarTop,
+                warriorImageClasses: 'col-7 p-0 w-100'
+            });
+        }
     }
 
     onWarriorBarMouseLeave = () => {
         this.setState({
-            warriorBarWidth: '3%',
-            warriorBarHeight: '12%',
+            warriorBarWidth: 3,
+            warriorBarHeight: clearingHeight,
             warriorBarColor: undefined,
             warriorBarZIndex: undefined,
-            warriorQuantityDisplay: 'none'
+            warriorQuantityDisplay: 'none',
+            warriorBarTop: this.props.top,
+            warriorImageClasses: 'w-100'
         })
     }
 
-    onClearingClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+    onClearingClick() {
+        this.props.onClearingClick(this.props.id, this.props.left, this.props.top);
     }
 
     getBorderColor(): string {
@@ -107,41 +143,74 @@ export class Clearing extends React.Component<IClearingProps, IClearingState>{
         }
     }
 
-    getSupportTokenElement(tokenImageStyle: React.CSSProperties) {
+    getSupportTokenElement(): JSX.Element | undefined {
         if (this.props.hasSupportToken) {
-            return <img src={supportImage} alt='support' style={tokenImageStyle}></img>
+            return <img className='h-100' src={supportImage} alt='support'></img>
         }
     }
 
-    getWoodTokenElement(tokenImageStyle: React.CSSProperties): JSX.Element[] | undefined {
+    getWoodTokenElement(): JSX.Element[] | undefined {
         if (this.props.woodTokens > 0) {
             return [
-                <img src={woodImage} alt='wood' style={tokenImageStyle}></img>,
-                <p style={{display: this.state.woodQuantityDisplay}}>x{this.props.woodTokens}</p>
+                <img key={0} src={woodImage} alt='wood' className='h-100'></img>,
+                <p key={1} style={{ display: this.state.woodQuantityDisplay }}>x{this.props.woodTokens}</p>
             ]
         }
     }
 
-    getKeepTokenElement(tokenImageStyle: React.CSSProperties) {
+    getKeepTokenElement() {
         if (this.props.hasKeepToken) {
-            return <img src={keepImage} alt='keep' style={tokenImageStyle}></img>
+            return <img src={keepImage} alt='keep' className='h-100'></img>
         }
     }
 
-    getWarriorElement(imageName: string, alt: string, imgaeStyle: React.CSSProperties){
-        return  <div className='row m-0'>
-        <img src={birdWarriorImage} alt='bird' style={imgaeStyle} />
-        <p style={
-            {
-                fontSize: '50%'
-            }}>x3</p>
-    </div>
+    getCatWarriorsElement() {
+        if (this.props.catWarriorsNumber > 0) {
+            return this.getWarriorElement(
+                catWarriorImage,
+                'cat',
+                this.props.catWarriorsNumber);
+        }
+    }
+
+    getBirdWarriorsElement() {
+        if (this.props.birdWarriorsNumber > 0) {
+            return this.getWarriorElement(
+                birdWarriorImage,
+                'bird',
+                this.props.birdWarriorsNumber);
+        }
+    }
+
+    getAllianceWarriorsElement() {
+        if (this.props.allianceWarriorsNumber > 0) {
+            return this.getWarriorElement(
+                allianceWarriorImage,
+                'alliance',
+                this.props.allianceWarriorsNumber);
+        }
+    }
+
+    getWarriorElement(
+        imageName: string,
+        alt: string,
+        warriorNumber: number) {
+        return <div className='row m-0'>
+            <img src={imageName} alt={alt} className={this.state.warriorImageClasses} />
+            <div className='col-5 p-0' style={
+                {
+                    display: this.state.warriorQuantityDisplay,
+                    fontSize: '1.7vh'
+                }}>
+                x{warriorNumber}
+            </div>
+        </div>
     }
 
     render() {
         const clearingStyle = {
             width: '12%',
-            height: '13%',
+            height: clearingHeight + '%',
             left: this.props.left + '%',
             top: this.props.top + '%',
             position: 'absolute' as 'absolute',
@@ -149,33 +218,23 @@ export class Clearing extends React.Component<IClearingProps, IClearingState>{
         }
 
         const tokenBarStyle = {
-            width: this.state.tokenBarWidth,
-            height: this.state.tokenBarHeight,
+            width: this.state.tokenBarWidth + '%',
+            height: this.state.tokenBarHeight + '%',
             position: 'absolute' as 'absolute',
-            left: this.props.left + '%',
+            left: this.state.tokenBarLeft + '%',
             top: this.props.top - 3 + '%',
-            border: '2px solid #000000',
             backgroundColor: this.state.tokenBarColor,
             zIndex: this.state.tokenBarZIndex
         }
 
         const warriorBarStyle = {
-            width: this.state.warriorBarWidth,
-            height: this.state.warriorBarHeight,
+            width: this.state.warriorBarWidth + '%',
+            height: this.state.warriorBarHeight + '%',
             position: 'absolute' as 'absolute',
             left: this.props.left + 12 + '%',
-            top: this.props.top + '%',
-            border: '2px solid #00ff00',
+            top: this.state.warriorBarTop + '%',
             backgroundColor: this.state.warriorBarColor,
             zIndex: this.state.warriorBarZIndex
-        }
-
-        const tokenImageStyle = {
-            height: '100%'
-        }
-
-        const warriorImageStyle = {
-            width: '60%'
         }
 
         return (
@@ -185,40 +244,23 @@ export class Clearing extends React.Component<IClearingProps, IClearingState>{
                     className='row m-0'
                     onMouseMove={this.onTokenBarMouseMove}
                     onMouseLeave={this.onTokenBarMouseLeave}>
-                    {this.getSupportTokenElement(tokenImageStyle)}
-                    {this.getWoodTokenElement(tokenImageStyle)}
-                    {this.getKeepTokenElement(tokenImageStyle)}
+                    {this.getSupportTokenElement()}
+                    {this.getWoodTokenElement()}
+                    {this.getKeepTokenElement()}
                 </div>
                 <div
                     style={warriorBarStyle}
                     onMouseMove={this.onWarriorBarMouseMove}
                     onMouseLeave={this.onWarriorBarMouseLeave}>
-                    <div className='row m-0'>
-                        <img src={birdWarriorImage} alt='bird' style={warriorImageStyle} />
-                        <p style={
-                            {
-                                fontSize: '50%'
-                            }}>x3</p>
-                    </div>
-                    <div className='row m-0'>
-                        <img src={catWarriorImage} alt='cat' style={warriorImageStyle} />
-                        <p style={
-                            {
-                                fontSize: '50%'
-                            }}>x3</p>
-                    </div>
-                    <div className='row m-0'>
-                        <img src={allianceWarriorImage} alt='alliance' style={warriorImageStyle} />
-                        <p style={
-                            {
-                                fontSize: '50%'
-                            }}>x3</p>
-                    </div>
+                    {this.getBirdWarriorsElement()}
+                    {this.getCatWarriorsElement()}
+                    {this.getAllianceWarriorsElement()}
                 </div>
                 <div
                     style={clearingStyle}
                     onClick={this.onClearingClick}>
                     {this.props.children}
+                    <p>{this.props.id}</p>
                 </div>
             </div>
         );

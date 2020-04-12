@@ -17,7 +17,7 @@ export interface ISlotProps {
     slotClick(id: string, location: LocationTypeEnum, type?: SlotTypeEnum): void;
 }
 
-export class Slot extends React.Component<ISlotProps, {}>{
+export class Slot extends React.Component<ISlotProps>{
     constructor(props: ISlotProps) {
         super(props);
         this.onBuildingClick = this.onBuildingClick.bind(this);

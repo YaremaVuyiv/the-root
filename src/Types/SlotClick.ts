@@ -1,7 +1,7 @@
 import { IAppState } from "../App";
 import { SlotTypeEnum } from "../Enums/SlotType";
 import { LocationTypeEnum } from "../Enums/LocationTypeEnum";
-import { Fraction } from "../Enums/Fraction";
+import { Faction } from "../Enums/Faction";
 
 export default function slotClick(prevState: IAppState, id: string, location: LocationTypeEnum, type: SlotTypeEnum): IAppState {
     if (location === LocationTypeEnum.tablet) {
@@ -16,7 +16,7 @@ export default function slotClick(prevState: IAppState, id: string, location: Lo
                     id: '',
                     slotType: SlotTypeEnum.sawmill,
                     locationType: LocationTypeEnum.tablet,
-                    fractionType: Fraction.MarquiseDeCat
+                    fractionType: Faction.MarquiseDeCat
                 }
                 return prevState;
 
@@ -32,7 +32,7 @@ export default function slotClick(prevState: IAppState, id: string, location: Lo
                     id: '',
                     slotType: SlotTypeEnum.workshop,
                     locationType: LocationTypeEnum.tablet,
-                    fractionType: Fraction.MarquiseDeCat
+                    fractionType: Faction.MarquiseDeCat
                 }
                 return prevState;
 
@@ -47,7 +47,7 @@ export default function slotClick(prevState: IAppState, id: string, location: Lo
                     id: '',
                     slotType: SlotTypeEnum.recruiter,
                     locationType: LocationTypeEnum.tablet,
-                    fractionType: Fraction.MarquiseDeCat
+                    fractionType: Faction.MarquiseDeCat
                 }
                 return prevState;
         }
