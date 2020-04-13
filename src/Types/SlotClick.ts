@@ -5,13 +5,14 @@ import { Faction } from "../Enums/Faction";
 
 export default function slotClick(prevState: IAppState, id: string, location: LocationTypeEnum, type: SlotTypeEnum): IAppState {
     if (location === LocationTypeEnum.tablet) {
+        prevState.modalIsOpen = false;
+        
         switch (type) {
             case SlotTypeEnum.sawmill:
                 const sawmills = prevState.marquiseTablet.sawmills.filter((sawmill, index) =>
                     index !== prevState.marquiseTablet.sawmills.length - 1);
 
                 prevState.marquiseTablet.sawmills = sawmills;
-                prevState.modalIsOpen = false;
                 prevState.chosenBuilding = {
                     id: '',
                     slotType: SlotTypeEnum.sawmill,
@@ -19,15 +20,13 @@ export default function slotClick(prevState: IAppState, id: string, location: Lo
                     fractionType: Faction.MarquiseDeCat
                 }
                 return prevState;
-
-                break;
+                
             case SlotTypeEnum.workshop:
 
                 const workshops = prevState.marquiseTablet.workshops.filter((workshop, index) =>
                     index !== prevState.marquiseTablet.workshops.length - 1);
 
                 prevState.marquiseTablet.workshops = workshops;
-                prevState.modalIsOpen = false;
                 prevState.chosenBuilding = {
                     id: '',
                     slotType: SlotTypeEnum.workshop,
@@ -42,12 +41,24 @@ export default function slotClick(prevState: IAppState, id: string, location: Lo
                     index !== prevState.marquiseTablet.recruiters.length - 1);
 
                 prevState.marquiseTablet.recruiters = recruiters;
-                prevState.modalIsOpen = false;
                 prevState.chosenBuilding = {
                     id: '',
                     slotType: SlotTypeEnum.recruiter,
                     locationType: LocationTypeEnum.tablet,
                     fractionType: Faction.MarquiseDeCat
+                }
+                return prevState;
+
+            case SlotTypeEnum.nest:
+                const nests = prevState.eyrieTablet.nests.filter((nest, index) =>
+                    index !== prevState.eyrieTablet.nests.length - 1);
+                
+                prevState.eyrieTablet.nests = nests;
+                prevState.chosenBuilding = {
+                    id: '',
+                    slotType: SlotTypeEnum.nest,
+                    locationType: LocationTypeEnum.tablet,
+                    fractionType: Faction.EyrieDynasties
                 }
                 return prevState;
         }

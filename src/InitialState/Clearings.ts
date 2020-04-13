@@ -1,6 +1,6 @@
 import { ClearingTypeEnum } from "../Enums/ClearingType";
 import { SlotTypeEnum } from "../Enums/SlotType";
-import { ClearingType, Clearing } from "../Types/ClearingType";
+import { Clearing } from "../Types/ClearingType";
 
 export default {
   'clearing1': new Clearing({

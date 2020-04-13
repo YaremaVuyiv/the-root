@@ -1,15 +1,16 @@
-import React, { Ref } from 'react';
+import React from 'react';
 import Modal from 'react-modal';
 import { MarquiseTablet } from './Components/MarquiseTablet';
 import { SlotModel } from './Models/SlotModel';
 import { SlotTypeEnum } from './Enums/SlotType';
-import Background from './map.jpg';
+import Background from './Assets/map.jpg';
 import { Slot } from './Components/Slot';
 import { ClearingComponent } from './Components/Clearing';
 import clearings from './InitialState/Clearings';
 import { ClearingDictionaryType } from './Types/ClearingDictionaryType';
 import { LocationTypeEnum } from './Enums/LocationTypeEnum';
 import marquiseTablet from './InitialState/MarquiseTabletState';
+import eyrieTablet from './InitialState/EyrieTabletState';
 import slotClick from './Types/SlotClick';
 import { ActionDialog } from './Components/ActionDialog';
 import { Clearing } from './Types/ClearingType';
@@ -17,6 +18,7 @@ import { Faction } from './Enums/Faction';
 import { canMove } from './Types/CanMove';
 import { canBattle } from './Types/CanBattle';
 import { canRecruit } from './Types/CanRecruit';
+import { EyrieTablet } from './Components/EyrieTablet';
 
 const customStyles = {
   content: {
@@ -56,6 +58,9 @@ export interface IAppState {
     workshops: SlotModel[],
     woodTokens: number;
   },
+  eyrieTablet: {
+    nests: SlotModel[]
+  }
   chosenBuilding: SlotModel | null;
   clearings: ClearingDictionaryType;
   actionDialogVisible: boolean;
@@ -76,6 +81,7 @@ export class App extends React.Component<IAppProps, IAppState>{
       actionDialogTop: 0,
       actionDialogLeft: 0,
       marquiseTablet: marquiseTablet,
+      eyrieTablet: eyrieTablet,
       chosenBuilding: null,
       clearings: clearings,
       actionDialogVisible: false,
@@ -121,6 +127,11 @@ export class App extends React.Component<IAppProps, IAppState>{
           case Faction.MarquiseDeCat:
             clearings[this.state.selectedClearingId].catWarriorsNumber -= this.warriorsToMove;
             clearings[id].catWarriorsNumber += this.warriorsToMove;
+            break;
+
+          case Faction.EyrieDynasties:
+            clearings[this.state.selectedClearingId].birdWarriorsNumber -= this.warriorsToMove;
+            clearings[id].birdWarriorsNumber += this.warriorsToMove;
             break;
         }
 
@@ -264,6 +275,12 @@ export class App extends React.Component<IAppProps, IAppState>{
           recruiters={this.state.marquiseTablet.recruiters}
           workshops={this.state.marquiseTablet.workshops}
           slotClick={this.slotClick} />
+
+      case Faction.EyrieDynasties:
+        return <EyrieTablet
+          nests={this.state.eyrieTablet.nests}
+          slotClick={this.slotClick}
+        />
     }
 
     return null;

@@ -1,4 +1,4 @@
-import React, { RefObject } from 'react';
+import React from 'react';
 import { Clearing } from '../Types/ClearingType';
 import { Faction, getFactionNameById } from '../Enums/Faction';
 
@@ -38,7 +38,6 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
     actionDialogStyle: React.CSSProperties | undefined;
     buttonStyle: React.CSSProperties | undefined;
     listElementStyle: React.CSSProperties | undefined;
-    actionDialogRef: RefObject<HTMLDivElement>;
     selectedClearing: Clearing | null;
     factionColorStyle: FactionColorStyle;
 
@@ -54,7 +53,16 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
                 }
 
                 break;
-            ////////////////// ADD CASES FOR OTHER FACTIONS
+
+            case Faction.EyrieDynasties:
+                console.log('eyrie');
+                this.factionColorStyle = {
+                    backgroundColor: '#3665a7',
+                    buttonBackgroundColor: '#1e365a',
+                    buttonColor: '#ffffff'
+                }
+                break;
+
             default:
                 this.factionColorStyle = {
                     backgroundColor: '#000000',
@@ -83,19 +91,17 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
             left: this.props.left + '%',
             minWidth: '12%',
             maxWidth: '16%',
-            backgroundColor: '#f87a02'
+            backgroundColor: this.factionColorStyle.backgroundColor
         }
 
         this.buttonStyle = {
-            backgroundColor: '#6a3421',
-            color: '#ffffff'
+            backgroundColor: this.factionColorStyle.buttonBackgroundColor,
+            color: this.factionColorStyle.buttonColor
         }
 
         this.listElementStyle = {
-            backgroundColor: '#f87a02'
+            backgroundColor: this.factionColorStyle.backgroundColor
         }
-
-        this.actionDialogRef = React.createRef();
 
         this.selectedClearing = this.props.selectedClearing;
     }
@@ -155,7 +161,7 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
                 </ul>
 
             case ActionDialogTypeEnum.battle:
-                const enemyTypes = this.selectedClearing?.getWarriorTypes().filter(x => x != this.props.faction);
+                const enemyTypes = this.selectedClearing?.getWarriorTypes().filter(x => x !== this.props.faction);
                 console.log(enemyTypes);
                 const enemyElements = enemyTypes?.map(x =>
                     <li key={x.toString()} className="list-group-item p-1" style={this.listElementStyle}>
@@ -171,13 +177,20 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
 
             case ActionDialogTypeEnum.move:
                 return <div>
-                    <input
-                        onChange={this.onMoveInputChange}
-                        className="form-control"
-                        value={this.state.warriorsSelected}
-                        type='number'
-                        max={this.selectedClearing?.catWarriorsNumber} />
-                    <button className='btn btn-default' onClick={this.submitMoveClick}>Submit</button>
+                    <div className='p-1'>
+                        <input
+                            onChange={this.onMoveInputChange}
+                            className="form-control w-100"
+                            value={this.state.warriorsSelected}
+                            type='number'
+                            max={this.selectedClearing?.getFactionWarriors(this.props.faction)} />
+                    </div>
+                    <div className='p-1'>
+                        <button
+                            className='btn btn-default w-100'
+                            onClick={this.submitMoveClick}
+                            style={this.buttonStyle}>Submit</button>
+                    </div>
                 </div>
         }
     }
@@ -195,7 +208,7 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
 
     render() {
         return (
-            <div ref={this.actionDialogRef} className='card text-center' style={this.actionDialogStyle}>
+            <div className='card text-center' style={this.actionDialogStyle}>
                 <h5 className="card-title mt-1" style={{
                     fontSize: '2vh'
                 }}>Choose action</h5>

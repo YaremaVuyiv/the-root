@@ -71,20 +71,31 @@ export class Clearing {
     return result;
   }
 
-  getWarriorTypes() : Faction[] {
+  getWarriorTypes(): Faction[] {
     const factions: Faction[] = [];
     if (this.catWarriorsNumber > 0) {
       factions.push(Faction.MarquiseDeCat);
     }
 
-    if(this.birdWarriorsNumber > 0) {
+    if (this.birdWarriorsNumber > 0) {
       factions.push(Faction.EyrieDynasties);
     }
 
-    if(this.allianceWarriorsNumber > 0) {
+    if (this.allianceWarriorsNumber > 0) {
       factions.push(Faction.WoodlandAllianse);
     }
 
     return factions;
+  }
+
+  getFactionWarriors(faction: Faction) {
+    switch (faction) {
+      case Faction.MarquiseDeCat:
+        return this.catWarriorsNumber;
+      case Faction.EyrieDynasties:
+        return this.birdWarriorsNumber;
+      case Faction.WoodlandAllianse:
+        return this.allianceWarriorsNumber;
+    }
   }
 }
