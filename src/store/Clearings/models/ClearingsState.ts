@@ -8,7 +8,7 @@ export interface ClearingsState {
     selectedClearingId: number | null
 }
 
-export interface Clearing1 {
+export interface Clearing {
     id: number,
     leftLocation: number,
     topLocation: number,
@@ -21,7 +21,7 @@ export interface Clearing1 {
 }
 
 type ClearingsDictionary = {
-    [id: number]: Clearing1
+    [id: number]: Clearing
 }
 
 interface Token {

@@ -10,7 +10,7 @@ import { AppState, store } from "../store/store";
 import { TokenType } from "../Enums/TokenTypeEnum";
 import { Faction } from "../Enums/Faction";
 import { connect } from "react-redux";
-import { Clearing1 } from "../store/Clearings/models/ClearingsState";
+import { Clearing } from "../store/Clearings/models/ClearingsState";
 import SlotComponent from "./SlotComponent";
 import { selectClearingAction } from "../store/Clearings/ClearingsActions";
 
@@ -31,7 +31,7 @@ interface IClearingProps {
 }
 
 function mapStateToProps(state: AppState, ownProps: { id: number }): IClearingProps {
-    const clearing: Clearing1 = state.clearingsReducer.byId[ownProps.id];
+    const clearing: Clearing = state.clearingsReducer.byId[ownProps.id];
 
     return {
         id: ownProps.id,
@@ -50,11 +50,11 @@ function mapStateToProps(state: AppState, ownProps: { id: number }): IClearingPr
     }
 }
 
-function getWarriorsNumber(clearing: Clearing1, type: Faction): number {
+function getWarriorsNumber(clearing: Clearing, type: Faction): number {
     return clearing.warriors.filter(warrior => warrior.type === type).length;
 }
 
-function getTokensNumber(clearing: Clearing1, type: TokenType): number {
+function getTokensNumber(clearing: Clearing, type: TokenType): number {
     return clearing.tokens.filter(token => token.type === type).length;
 }
 
