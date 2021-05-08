@@ -1,9 +1,9 @@
 import { ClearingTypeEnum } from "../Enums/ClearingType";
-import { SlotTypeEnum } from "../Enums/SlotType";
 import { Clearing } from "../Types/ClearingType";
 
 export default {
   'clearing1': new Clearing({
+    id: 'clearing1',
     left: 5,
     top: 7,
     woodTokenNumber: 0,
@@ -20,15 +20,10 @@ export default {
       'clearing3',
       'clearing6'
     ],
-    slots:{
-      'slot1': {
-        left: 20,
-    top: 32,
-    type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: ['slot1']
   }),
   'clearing2': new Clearing({
+    id: 'clearing2',
     left: 4,
     top: 35,
     woodTokenNumber: 2,
@@ -45,20 +40,13 @@ export default {
       'clearing3',
       'clearing6'
     ],
-    slots: {
-      'slot2': {
-        left: 23,
-        top: 72,
-        type: SlotTypeEnum.empty
-      },
-      'slot3': {
-        left: 61,
-        top: 1,
-        type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: [
+      'slot2',
+      'slot3'
+    ]
   }),
   'clearing3': new Clearing({
+    id: 'clearing3',
     key: 3,
     left: 5,
     top: 76,
@@ -75,15 +63,12 @@ export default {
       'clearing6',
       'clearing7'
     ],
-    slots: {
-      'slot4': {
-        left: 71,
-        top: 26,
-        type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: [
+      'slot4'
+    ]
   }),
   'clearing4': new Clearing({
+    id: 'clearing4',
     key: 4,
     left: 48,
     top: 3,
@@ -99,20 +84,13 @@ export default {
       'clearing1',
       'clearing10'
     ],
-    slots: {
-      'slot5': {
-        left: 14,
-        top: 23,
-        type: SlotTypeEnum.empty
-      },
-      'slot6': {
-        left: 61,
-        top: 17,
-        type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: [
+      'slot5',
+      'slot6'
+    ]
   }),
   'clearing5': new Clearing({
+    id: 'clearing5',
     key: 5,
     left: 36,
     top: 23,
@@ -129,20 +107,13 @@ export default {
       'clearing6',
       'clearing10'
     ],
-    slots: {
-      'slot7': {
-        left: 7,
-        top: 13,
-        type: SlotTypeEnum.empty
-      },
-      'slot8': {
-        left: 55,
-        top: 73,
-        type: SlotTypeEnum.ruin
-      }
-    }
+    slotIds: [
+      'slot7',
+      'slot8'
+    ]
   }),
   'clearing6': new Clearing({
+    id: 'clearing6',
     key: 6,
     left: 26,
     top: 49,
@@ -161,20 +132,13 @@ export default {
       'clearing8',
       'clearing9'
     ],
-    slots: {
-      'slot9': {
-        left: 64,
-        top: 29,
-        type: SlotTypeEnum.ruin
-      },
-      'slot10': {
-        left: 29,
-        top: 67,
-        type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: [
+      'slot9',
+      'slot10'
+    ]
   }),
   'clearing7': new Clearing({
+    id: 'clearing7',
     key: 7,
     left: 31,
     top: 81,
@@ -190,20 +154,13 @@ export default {
       'clearing3',
       'clearing9'
     ],
-    slots: {
-      'slot11': {
-        left: 59,
-        top: 11,
-        type: SlotTypeEnum.empty
-      },
-      'slot12': {
-        left: 45,
-        top: 59,
-        type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: [
+      'slot11',
+      'slot12'
+    ]
   }),
   'clearing8': new Clearing({
+    id: 'clearing8',
     key: 8,
     left: 57,
     top: 42,
@@ -220,25 +177,14 @@ export default {
       'clearing11',
       'clearing12'
     ],
-    slots: {
-      'slot13': {
-        left: 25,
-        top: 10,
-        type: SlotTypeEnum.empty
-      },
-      'slot14': {
-        left: 56,
-        top: 35,
-        type: SlotTypeEnum.empty
-      },
-      'slot15': {
-        left: 21,
-        top: 62,
-        type: SlotTypeEnum.ruin
-      }
-    }
+    slotIds: [
+      'slot13',
+      'slot14',
+      'slot15'
+    ]
   }),
   'clearing9': new Clearing({
+    id: 'clearing9',
     key: 9,
     left: 52,
     top: 70,
@@ -255,20 +201,13 @@ export default {
       'clearing7',
       'clearing12'
     ],
-    slots: {
-      'slot16': {
-        left: 37,
-        top: 8,
-        type: SlotTypeEnum.empty
-      },
-      'slot17': {
-        left: 9,
-        top: 54,
-        type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: [
+      'slot16',
+      'slot17'
+    ]
   }),
   'clearing10': new Clearing({
+    id: 'clearing10',
     key: 10,
     left: 81,
     top: 17,
@@ -285,20 +224,13 @@ export default {
       'clearing5',
       'clearing11'
     ],
-    slots: {
-      'slot18': {
-        left: 38,
-        top: 23,
-        type: SlotTypeEnum.empty
-      },
-      'slot19': {
-        left: 57,
-        top: 62,
-        type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: [
+      'slot18',
+      'slot19'
+    ]
   }),
   'clearing11': new Clearing({
+    id: 'clearing11',
     key: 11,
     left: 84,
     top: 45,
@@ -315,20 +247,13 @@ export default {
       'clearing10',
       'clearing12'
     ],
-    slots: {
-      'slot20': {
-        left: 48,
-        top: 11,
-        type: SlotTypeEnum.ruin
-      },
-      'slot21': {
-        left: 9,
-        top: 53,
-        type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: [
+      'slot20',
+      'slot21'
+    ]
   }),
   'clearing12': new Clearing({
+    id: 'clearing12',
     key: 12,
     left: 77,
     top: 80,
@@ -345,12 +270,8 @@ export default {
       'clearing9',
       'clearing11'
     ],
-    slots: {
-      'slot22': {
-        left: 19,
-        top: 34,
-        type: SlotTypeEnum.empty
-      }
-    }
+    slotIds: [
+      'slot22'
+    ]
   })
 }

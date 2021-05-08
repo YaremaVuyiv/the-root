@@ -19,13 +19,12 @@ export interface IActionDialogProps {
     left: number;
     onDialogClose(): void;
     onMovementSubmit(warriorsNumber: number): void;
-    onRecruitSubmit(): void;
     onBattleSubmit(faction: Faction): void;
+    onRecruitClick(clearingId?: string): void;
     selectedClearing: Clearing | null;
     faction: Faction;
     canMove: boolean;
     canBattle: boolean;
-    canRecruit: boolean;
 }
 
 export interface IActionDialogState {
@@ -76,9 +75,9 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
         this.moveButtonCLick = this.moveButtonCLick.bind(this);
         this.submitMoveClick = this.submitMoveClick.bind(this);
         this.onMoveInputChange = this.onMoveInputChange.bind(this);
-        this.onRecruitClick = this.onRecruitClick.bind(this);
         this.onBattleClick = this.onBattleClick.bind(this);
         this.submitBattleClick = this.submitBattleClick.bind(this);
+        this.onRecruitClick = this.onRecruitClick.bind(this);
 
         this.state = {
             top: this.props.top,
@@ -116,10 +115,6 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
         this.props.onMovementSubmit(this.state.warriorsSelected);
     }
 
-    onRecruitClick() {
-        this.props.onRecruitSubmit();
-    }
-
     onBattleClick() {
         this.setState({
             dialogType: ActionDialogTypeEnum.battle
@@ -128,6 +123,10 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
 
     submitBattleClick(faction: Faction) {
         this.props.onBattleSubmit(faction);
+    }
+
+    onRecruitClick() {
+        this.props.onRecruitClick(this.props.selectedClearing?.id);
     }
 
     getCorrectDialog(): JSX.Element | undefined {
@@ -148,12 +147,13 @@ export class ActionDialog extends React.Component<IActionDialogProps, IActionDia
                                 className='btn btn-default w-100'
                                 style={this.buttonStyle}>Battle</button>
                         </li> : undefined}
-                    {this.props.canRecruit ? <li className="list-group-item p-1" style={this.listElementStyle}>
-                        <button
-                            onClick={this.onRecruitClick}
-                            className='btn btn-default w-100'
-                            style={this.buttonStyle}>Recruit</button>
-                    </li> : undefined}
+                    {this.props.faction === Faction.EyrieDynasties ?
+                        <li className="list-group-item p-1" style={this.listElementStyle}>
+                            <button
+                                onClick={this.onRecruitClick}
+                                className='btn btn-default w-100'
+                                style={this.buttonStyle}>Recruit</button>
+                        </li> : undefined}
                     {this.props.faction === Faction.WoodlandAllianse ?
                         <li className="list-group-item p-1" style={this.listElementStyle}>
                             <button className='btn btn-default w-100' style={this.buttonStyle}>Revolt</button>

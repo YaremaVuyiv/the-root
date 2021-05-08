@@ -1,9 +1,7 @@
 import React from 'react';
 import image from '../Assets/eyrieTablet.png';
-import { Slot } from './Slot';
 import { SlotModel } from '../Models/SlotModel';
-import { SlotTypeEnum } from '../Enums/SlotType';
-import { LocationTypeEnum } from '../Enums/LocationTypeEnum';
+import { SlotTypeEnum } from '../Enums/SlotTypeEnum';
 
 const modalStyle = {
     backgroundImage: `url(${image})`,
@@ -28,26 +26,25 @@ const sawmillYPosition = 41.7;
 
 interface IEyrieTabletProps {
     nests: SlotModel[];
-    slotClick(id: string, location: LocationTypeEnum, type?: SlotTypeEnum): void;
+    slotClick(id: string, type?: SlotTypeEnum): void;
 }
 
 export class EyrieTablet extends React.Component<IEyrieTabletProps>{
     render() {
-        let nests = this.props.nests.map((nest: SlotModel, index: number) => {
-            return <Slot
+        /*let nests = this.props.nests.map((nest: SlotModel, index: number) => {
+            return <SlotComponent
                 key={index}
                 locationType={LocationTypeEnum.tablet}
-                id={'sawmill'+index}
+                id={'sawmill' + index}
                 top={sawmillYPosition}
                 left={slotsXPositions[index]}
                 side={8}
                 type={nest?.slotType}
                 slotClick={this.props.slotClick} />
-        })
+        })*/
 
         return (
             <div style={modalStyle}>
-                {nests}
             </div>
         );
     }

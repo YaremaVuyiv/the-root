@@ -6,9 +6,16 @@ import keepImage from '../Assets/keep.png';
 import birdWarriorImage from '../Assets/birdWarrior.png';
 import catWarriorImage from '../Assets/catWarrior.png';
 import allianceWarriorImage from '../Assets/allianceWarrior.png';
+import { AppState, store } from "../store/store";
+import { TokenType } from "../Enums/TokenTypeEnum";
+import { Faction } from "../Enums/Faction";
+import { connect } from "react-redux";
+import { Clearing1 } from "../store/Clearings/models/ClearingsState";
+import SlotComponent from "./SlotComponent";
+import { selectClearingAction } from "../store/Clearings/ClearingsActions";
 
-export interface IClearingProps {
-    id: string,
+interface IClearingProps {
+    id: number,
     top: number;
     left: number;
     type: ClearingTypeEnum;
@@ -19,7 +26,36 @@ export interface IClearingProps {
     catWarriorsNumber: number;
     birdWarriorsNumber: number;
     allianceWarriorsNumber: number;
-    onClearingClick(id: string, mouseX: number, mouseY: number): void;
+    isActivated: boolean;
+    slotIds: number[];
+}
+
+function mapStateToProps(state: AppState, ownProps: { id: number }): IClearingProps {
+    const clearing: Clearing1 = state.clearingsReducer.byId[ownProps.id];
+
+    return {
+        id: ownProps.id,
+        top: clearing.topLocation,
+        left: clearing.leftLocation,
+        type: clearing.type,
+        hasSupportToken: getTokensNumber(clearing, TokenType.support) > 0,
+        woodTokens: getTokensNumber(clearing, TokenType.wood),
+        hasKeepToken: getTokensNumber(clearing, TokenType.keep) > 0,
+        hasWagabond: false,
+        catWarriorsNumber: getWarriorsNumber(clearing, Faction.MarquiseDeCat),
+        birdWarriorsNumber: getWarriorsNumber(clearing, Faction.EyrieDynasties),
+        allianceWarriorsNumber: getWarriorsNumber(clearing, Faction.WoodlandAllianse),
+        slotIds: clearing.slotIds,
+        isActivated: clearing.isActive
+    }
+}
+
+function getWarriorsNumber(clearing: Clearing1, type: Faction): number {
+    return clearing.warriors.filter(warrior => warrior.type === type).length;
+}
+
+function getTokensNumber(clearing: Clearing1, type: TokenType): number {
+    return clearing.tokens.filter(token => token.type === type).length;
 }
 
 export interface IClearingState {
@@ -40,8 +76,8 @@ export interface IClearingState {
 
 const clearingHeight = 13;
 
-export class ClearingComponent extends React.Component<IClearingProps, IClearingState>{
-    constructor(props: IClearingProps) {
+class ClearingComponent extends React.Component<IClearingProps, IClearingState>{
+    constructor(props: any) {
         super(props)
         this.onClearingClick = this.onClearingClick.bind(this);
         this.onTokenBarMouseMove = this.onTokenBarMouseMove.bind(this);
@@ -129,10 +165,19 @@ export class ClearingComponent extends React.Component<IClearingProps, IClearing
     }
 
     onClearingClick() {
-        this.props.onClearingClick(this.props.id, this.props.left, this.props.top);
+        const selectedClearingId: number | null = store.getState().clearingsReducer.selectedClearingId;
+        if (selectedClearingId === null) {
+            store.dispatch(selectClearingAction(this.props.id))
+            console.log(store.getState().clearingsReducer.selectedClearingId);
+        } else {
+
+        }
     }
 
     getBorderColor(): string {
+        if (this.props.isActivated === true) {
+            return '#ffffff';
+        }
         switch (this.props.type) {
             case ClearingTypeEnum.fox:
                 return '#ff0000';
@@ -158,13 +203,13 @@ export class ClearingComponent extends React.Component<IClearingProps, IClearing
         }
     }
 
-    getKeepTokenElement() {
+    getKeepTokenElement(): JSX.Element | undefined {
         if (this.props.hasKeepToken) {
             return <img src={keepImage} alt='keep' className='h-100'></img>
         }
     }
 
-    getCatWarriorsElement() {
+    getCatWarriorsElement(): JSX.Element | undefined {
         if (this.props.catWarriorsNumber > 0) {
             return this.getWarriorElement(
                 catWarriorImage,
@@ -173,7 +218,7 @@ export class ClearingComponent extends React.Component<IClearingProps, IClearing
         }
     }
 
-    getBirdWarriorsElement() {
+    getBirdWarriorsElement(): JSX.Element | undefined {
         if (this.props.birdWarriorsNumber > 0) {
             return this.getWarriorElement(
                 birdWarriorImage,
@@ -182,7 +227,7 @@ export class ClearingComponent extends React.Component<IClearingProps, IClearing
         }
     }
 
-    getAllianceWarriorsElement() {
+    getAllianceWarriorsElement(): JSX.Element | undefined {
         if (this.props.allianceWarriorsNumber > 0) {
             return this.getWarriorElement(
                 allianceWarriorImage,
@@ -194,7 +239,7 @@ export class ClearingComponent extends React.Component<IClearingProps, IClearing
     getWarriorElement(
         imageName: string,
         alt: string,
-        warriorNumber: number) {
+        warriorNumber: number): JSX.Element {
         return <div className='row m-0'>
             <img src={imageName} alt={alt} className={this.state.warriorImageClasses} />
             <div className='col-5 p-0' style={
@@ -259,10 +304,18 @@ export class ClearingComponent extends React.Component<IClearingProps, IClearing
                 <div
                     style={clearingStyle}
                     onClick={this.onClearingClick}>
-                    {this.props.children}
+                    {
+                        this.props.slotIds.map(slotId =>
+                            <SlotComponent
+                                key={slotId}
+                                id={slotId}
+                            />)
+                    }
                     <p>{this.props.id}</p>
                 </div>
             </div>
         );
     }
 }
+
+export default connect(mapStateToProps)(ClearingComponent);

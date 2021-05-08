@@ -1,13 +1,12 @@
 import { ClearingTypeEnum } from "../Enums/ClearingType";
-import { SlotDictionaryType } from "./SlotDictionaryType";
-import { SlotTypeEnum } from "../Enums/SlotType";
 import { Faction } from "../Enums/Faction";
 
 export type ClearingType = {
+  id: string;
   left: number;
   top: number;
   type: ClearingTypeEnum;
-  slots: SlotDictionaryType;
+  slotIds: string[];
   key: number;
   hasSupportToken: boolean;
   hasKeepToken: boolean;
@@ -20,10 +19,11 @@ export type ClearingType = {
 }
 
 export class Clearing {
+  id: string;
   left: number;
   top: number;
   type: ClearingTypeEnum;
-  slots: SlotDictionaryType;
+  slotIds: string[];
   key: number;
   hasSupportToken: boolean;
   hasKeepToken: boolean;
@@ -36,10 +36,11 @@ export class Clearing {
 
   constructor(clearing: ClearingType
   ) {
+    this.id = clearing.id;
     this.left = clearing.left;
     this.top = clearing.top;
     this.type = clearing.type;
-    this.slots = clearing.slots;
+    this.slotIds = clearing.slotIds;
     this.key = clearing.key;
     this.hasSupportToken = clearing.hasSupportToken;
     this.hasKeepToken = clearing.hasKeepToken;
@@ -49,26 +50,6 @@ export class Clearing {
     this.birdWarriorsNumber = clearing.birdWarriorsNumber;
     this.allianceWarriorsNumber = clearing.allianceWarriorsNumber;
     this.connectedClearings = clearing.connectedClearings;
-  }
-
-  getCatPiecesNumber(): number {
-    var result = this.catWarriorsNumber;
-    for (let slotId in this.slots) {
-      result += +(this.slots[slotId].type === SlotTypeEnum.recruiter);
-      result += +(this.slots[slotId].type === SlotTypeEnum.sawmill);
-      result += +(this.slots[slotId].type === SlotTypeEnum.workshop);
-    }
-
-    return result;
-  }
-
-  getBirdPiecesNumber(): number {
-    var result = this.birdWarriorsNumber;
-    for (let slotId in this.slots) {
-      result += +(this.slots[slotId].type === SlotTypeEnum.nest);
-    }
-
-    return result;
   }
 
   getWarriorTypes(): Faction[] {

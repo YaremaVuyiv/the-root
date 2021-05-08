@@ -4,29 +4,35 @@ import workshopImage from "../Assets/workshop.png";
 import recruiterImage from "../Assets/recruiter.png";
 import nestImage from "../Assets/nest.png";
 import ruinImage from "../Assets/ruin.png";
-import { SlotTypeEnum } from "../Enums/SlotType";
-import { LocationTypeEnum } from "../Enums/LocationTypeEnum";
+import { SlotTypeEnum } from "../Enums/SlotTypeEnum";
+import { AppState } from "../store/store";
+import { connect } from "react-redux";
 
-export interface ISlotProps {
+interface ISlotProps {
     id: string;
     left: number;
     top: number;
-    side: number;
     type?: SlotTypeEnum;
-    locationType: LocationTypeEnum;
-    slotClick(id: string, location: LocationTypeEnum, type?: SlotTypeEnum): void;
 }
 
-export class Slot extends React.Component<ISlotProps>{
-    constructor(props: ISlotProps) {
-        super(props);
-        this.onBuildingClick = this.onBuildingClick.bind(this);
-    }
+interface OwnProps {
+    id: number
+}
 
-    onBuildingClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        this.props.slotClick(this.props.id, this.props.locationType, this.props.type);
-    }
+function mapStateToProps(state: AppState, ownProps: OwnProps): ISlotProps {
+    const slot = state.slotsReducer.byId[ownProps.id];
 
+    return {
+        id: 'slot' + slot.id,
+        left: slot.left,
+        top: slot.top,
+        type: slot.type
+    };
+}
+
+const side: number = 25;
+
+class SlotComponent extends React.Component<ISlotProps>{
     render() {
         let image = "";
         switch (this.props.type) {
@@ -50,8 +56,8 @@ export class Slot extends React.Component<ISlotProps>{
         }
 
         const buildingStyle = {
-            width: this.props.side + '%',
-            height: this.props.side + '%',
+            width: side + '%',
+            height: side + '%',
             left: this.props.left + '%',
             top: this.props.top + '%',
             position: 'absolute' as 'absolute',
@@ -61,7 +67,9 @@ export class Slot extends React.Component<ISlotProps>{
         }
 
         return (
-            <div style={buildingStyle} onClick={this.onBuildingClick}></div>
+            <div style={buildingStyle}></div>
         )
     }
 }
+
+export default connect(mapStateToProps)(SlotComponent);

@@ -1,24 +1,23 @@
 import React from 'react';
 import Modal from 'react-modal';
-import { MarquiseTablet } from './Components/MarquiseTablet';
 import { SlotModel } from './Models/SlotModel';
-import { SlotTypeEnum } from './Enums/SlotType';
 import Background from './Assets/map.jpg';
-import { Slot } from './Components/Slot';
-import { ClearingComponent } from './Components/Clearing';
 import clearings from './InitialState/Clearings';
 import { ClearingDictionaryType } from './Types/ClearingDictionaryType';
-import { LocationTypeEnum } from './Enums/LocationTypeEnum';
 import marquiseTablet from './InitialState/MarquiseTabletState';
 import eyrieTablet from './InitialState/EyrieTabletState';
-import slotClick from './Types/SlotClick';
-import { ActionDialog } from './Components/ActionDialog';
 import { Clearing } from './Types/ClearingType';
+import { Clearing1 } from './store/Clearings/models/ClearingsState';
 import { Faction } from './Enums/Faction';
-import { canMove } from './Types/CanMove';
-import { canBattle } from './Types/CanBattle';
-import { canRecruit } from './Types/CanRecruit';
-import { EyrieTablet } from './Components/EyrieTablet';
+import { CardDictionaryType } from './Types/CardDictionaryType';
+import Cards from './InitialState/Cards';
+import { CardsComponent } from './Components/CardsComponent';
+import { connect } from 'react-redux';
+import { AppState, store } from './store/store';
+import ClearingComponent from './Components/ClearingComponent';
+import { dominanceCheckService } from './Services/IDominanceCheckService';
+import { getAllClearings } from './store/Selectors';
+import { activateClearingsAction } from './store/Clearings/ClearingsActions';
 
 const customStyles = {
   content: {
@@ -42,10 +41,9 @@ const backgroundStyle = {
   position: 'relative' as 'relative'
 }
 
-const clearingHeight = 13;
-
 interface IAppProps {
   faction: Faction;
+  clearings: Clearing1[];
 }
 
 export interface IAppState {
@@ -65,13 +63,12 @@ export interface IAppState {
   clearings: ClearingDictionaryType;
   actionDialogVisible: boolean;
   selectedClearing: Clearing | null;
-  selectedClearingId: string;
 }
 
 Modal.setAppElement(document.getElementById('root') ?? 'App');
-
-export class App extends React.Component<IAppProps, IAppState>{
+class App extends React.Component<IAppProps, IAppState>{
   warriorsToMove: number;
+  allCards: CardDictionaryType;
 
   constructor(props: IAppProps) {
     super(props);
@@ -85,21 +82,17 @@ export class App extends React.Component<IAppProps, IAppState>{
       chosenBuilding: null,
       clearings: clearings,
       actionDialogVisible: false,
-      selectedClearing: null,
-      selectedClearingId: ""
+      selectedClearing: null
     };
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
-    this.slotClick = this.slotClick.bind(this);
     this.onClearingClick = this.onClearingClick.bind(this);
     this.onActionDialogClose = this.onActionDialogClose.bind(this);
     this.onMovementSubmit = this.onMovementSubmit.bind(this);
-    this.getActionDialogElement = this.getActionDialogElement.bind(this);
-    this.onRecruitSubmit = this.onRecruitSubmit.bind(this);
-    this.onRecruitSubmit = this.onRecruitSubmit.bind(this);
     this.onBattleSubmit = this.onBattleSubmit.bind(this);
 
     this.warriorsToMove = 0;
+    this.allCards = Cards;
   }
 
   openModal() {
@@ -114,23 +107,27 @@ export class App extends React.Component<IAppProps, IAppState>{
     });
   }
 
-  slotClick(id: string, location: LocationTypeEnum, type: SlotTypeEnum): void {
-    this.setState(slotClick(this.state, id, location, type));
-  }
+  onClearingClick(id: string, left: number, top: number): void {
+    if (this.state.chosenBuilding) {
+      this.setState({
+        chosenBuilding: null
+      });
 
-  onClearingClick(id: string, left: number, top: number) {
-    if (this.warriorsToMove > 0) {
+      return;
+    }
+
+    if (this.warriorsToMove > 0 && this.state.selectedClearing) {
       const clearings = this.state.clearings;
-      const connectedClearings = clearings[this.state.selectedClearingId].connectedClearings;
+      const connectedClearings = clearings[this.state.selectedClearing.id].connectedClearings;
       if (connectedClearings.some(x => x === id)) {
         switch (this.props.faction) {
           case Faction.MarquiseDeCat:
-            clearings[this.state.selectedClearingId].catWarriorsNumber -= this.warriorsToMove;
+            clearings[this.state.selectedClearing.id].catWarriorsNumber -= this.warriorsToMove;
             clearings[id].catWarriorsNumber += this.warriorsToMove;
             break;
 
           case Faction.EyrieDynasties:
-            clearings[this.state.selectedClearingId].birdWarriorsNumber -= this.warriorsToMove;
+            clearings[this.state.selectedClearing.id].birdWarriorsNumber -= this.warriorsToMove;
             clearings[id].birdWarriorsNumber += this.warriorsToMove;
             break;
         }
@@ -141,18 +138,20 @@ export class App extends React.Component<IAppProps, IAppState>{
       }
 
       this.warriorsToMove = 0;
-    }
-    else {
-      this.setState((state: IAppState) => {
-        state.actionDialogVisible = true;
-        state.actionDialogLeft = left;
-        state.actionDialogTop = top;
-        state.selectedClearing = state.clearings[id];
-        state.selectedClearingId = id;
 
-        return state;
-      });
+      return;
     }
+
+    this.setState((state: IAppState) => {
+      state.actionDialogVisible = true;
+      state.actionDialogLeft = left;
+      state.actionDialogTop = top;
+      state.selectedClearing = state.clearings[id];
+
+      return state;
+    });
+
+    console.log(this.state);
   }
 
   onActionDialogClose() {
@@ -171,27 +170,21 @@ export class App extends React.Component<IAppProps, IAppState>{
     this.warriorsToMove = warriorsNumber;
   }
 
-  onRecruitSubmit() {
-    const clearings = this.state.clearings;
-    for (let clearingId in clearings) {
-      const clearing = clearings[clearingId];
-      for (let slotId in clearing.slots) {
-        switch (this.props.faction) {
-          case Faction.MarquiseDeCat:
-            if (clearing.slots[slotId].type === SlotTypeEnum.recruiter) {
-              clearings[clearingId].catWarriorsNumber++;
-            }
-            break;
-        }
+  getClearingIdBySlotId(slotId: string): string | null {
+    for (let clearingId in this.state.clearings) {
+      if (this.state.clearings[clearingId].slotIds.some(x => x === slotId)) {
+        return clearingId;
       }
     }
 
-    this.setState({
-      clearings: clearings
-    });
+    return null;
   }
 
   onBattleSubmit(faction: Faction) {
+    if (!this.state.selectedClearing) {
+      return;
+    }
+
     const rnd1 = Math.floor(Math.random() * 4);
     const rnd2 = Math.floor(Math.random() * 4);
     let attackerWarriorToRemove = 0;
@@ -200,37 +193,37 @@ export class App extends React.Component<IAppProps, IAppState>{
     const clearings = this.state.clearings;
     switch (faction) {
       case Faction.EyrieDynasties:
-        attackerWarriorToRemove = Math.min(clearings[this.state.selectedClearingId].birdWarriorsNumber, Math.min(rnd1, rnd2));
+        attackerWarriorToRemove = Math.min(clearings[this.state.selectedClearing.id].birdWarriorsNumber, Math.min(rnd1, rnd2));
         break;
       case Faction.MarquiseDeCat:
-        attackerWarriorToRemove = Math.min(clearings[this.state.selectedClearingId].catWarriorsNumber, Math.min(rnd1, rnd2));
+        attackerWarriorToRemove = Math.min(clearings[this.state.selectedClearing.id].catWarriorsNumber, Math.min(rnd1, rnd2));
         break;
     }
 
     switch (this.props.faction) {
       case Faction.MarquiseDeCat:
-        clearings[this.state.selectedClearingId].catWarriorsNumber -= attackerWarriorToRemove;
+        clearings[this.state.selectedClearing.id].catWarriorsNumber -= attackerWarriorToRemove;
         break;
       case Faction.EyrieDynasties:
-        clearings[this.state.selectedClearingId].birdWarriorsNumber -= attackerWarriorToRemove;
+        clearings[this.state.selectedClearing.id].birdWarriorsNumber -= attackerWarriorToRemove;
         break;
     }
 
     switch (this.props.faction) {
       case Faction.MarquiseDeCat:
-        defenderWarriorToRemove = Math.min(clearings[this.state.selectedClearingId].catWarriorsNumber, Math.max(rnd1, rnd2));
+        defenderWarriorToRemove = Math.min(clearings[this.state.selectedClearing.id].catWarriorsNumber, Math.max(rnd1, rnd2));
         break;
       case Faction.EyrieDynasties:
-        defenderWarriorToRemove = Math.min(clearings[this.state.selectedClearingId].birdWarriorsNumber, Math.max(rnd1, rnd2));
+        defenderWarriorToRemove = Math.min(clearings[this.state.selectedClearing.id].birdWarriorsNumber, Math.max(rnd1, rnd2));
         break;
     }
 
     switch (faction) {
       case Faction.EyrieDynasties:
-        clearings[this.state.selectedClearingId].birdWarriorsNumber -= defenderWarriorToRemove;
+        clearings[this.state.selectedClearing.id].birdWarriorsNumber -= defenderWarriorToRemove;
         break;
       case Faction.MarquiseDeCat:
-        clearings[this.state.selectedClearingId].catWarriorsNumber -= defenderWarriorToRemove;
+        clearings[this.state.selectedClearing.id].catWarriorsNumber -= defenderWarriorToRemove;
         break;
     }
 
@@ -242,104 +235,72 @@ export class App extends React.Component<IAppProps, IAppState>{
     alert(rnd1 + ":" + rnd2);
   }
 
-  getActionDialogElement(): JSX.Element | null {
-    if (!this.state.actionDialogVisible) {
-      return null;
-    }
+  getCardsModal() {
+    const rnd1 = Math.floor(Math.random() * 54) + 1;
+    const rnd2 = Math.floor(Math.random() * 54) + 1;
+    const rnd3 = Math.floor(Math.random() * 54) + 1;
 
-    const canMoveOnClearing = canMove(this.props.faction, this.state.clearings, this.state.selectedClearingId).length > 0;
-    const canBattleOnClearing = canBattle(this.props.faction, this.state.clearings, this.state.selectedClearingId);
-    const canRecruitOnClearing = canRecruit(this.props.faction, this.state.clearings, this.state.selectedClearingId);
+    const cards = [
+      this.allCards['card' + rnd1].card,
+      this.allCards['card' + rnd2].card,
+      this.allCards['card' + rnd3].card
+    ];
 
-    return canMoveOnClearing || canBattleOnClearing || canRecruitOnClearing ?
-      <ActionDialog
-        onBattleSubmit={this.onBattleSubmit}
-        onRecruitSubmit={this.onRecruitSubmit}
-        onMovementSubmit={this.onMovementSubmit}
-        canMove={canMoveOnClearing}
-        canBattle={canBattleOnClearing}
-        canRecruit={canRecruitOnClearing}
-        faction={this.props.faction}
-        selectedClearing={this.state.selectedClearing}
-        top={this.state.actionDialogTop + clearingHeight}
-        left={this.state.actionDialogLeft}
-        onDialogClose={this.onActionDialogClose} />
-      : null
+    return <CardsComponent cards={cards} />
   }
 
-  getTabletElement(): JSX.Element | null {
-    switch (this.props.faction) {
-      case Faction.MarquiseDeCat:
-        return <MarquiseTablet
-          sawmills={this.state.marquiseTablet.sawmills}
-          recruiters={this.state.marquiseTablet.recruiters}
-          workshops={this.state.marquiseTablet.workshops}
-          slotClick={this.slotClick} />
-
-      case Faction.EyrieDynasties:
-        return <EyrieTablet
-          nests={this.state.eyrieTablet.nests}
-          slotClick={this.slotClick}
-        />
-    }
-
-    return null;
+  onMoveClick = () => {
+    const clearings: Clearing1[] = getAllClearings();
+    const dominatingClearings = clearings
+      .filter(clearing => dominanceCheckService.isDominating(clearing.id, this.props.faction))
+      .map(clearing => clearing.id);
+    store.dispatch(activateClearingsAction(dominatingClearings));
   }
 
   render() {
-    const elements = [];
-    for (let el in this.state.clearings) {
-      const slots = [];
-      for (let sl in this.state.clearings[el].slots) {
-        slots.push(<Slot
-          key={sl}
-          locationType={LocationTypeEnum.map}
-          top={this.state.clearings[el].slots[sl].top}
-          left={this.state.clearings[el].slots[sl].left}
-          type={this.state.clearings[el].slots[sl].type}
-          id={sl}
-          side={25}
-          slotClick={this.slotClick}
-        />);
-      }
-      elements.push(<ClearingComponent
-        id={el}
-        key={this.state.clearings[el].key}
-        left={this.state.clearings[el].left}
-        top={this.state.clearings[el].top}
-        type={this.state.clearings[el].type}
-        hasSupportToken={this.state.clearings[el].hasSupportToken}
-        hasKeepToken={this.state.clearings[el].hasKeepToken}
-        woodTokens={this.state.clearings[el].woodTokenNumber}
-        hasWagabond={this.state.clearings[el].hasWagabond}
-        catWarriorsNumber={this.state.clearings[el].catWarriorsNumber}
-        birdWarriorsNumber={this.state.clearings[el].birdWarriorsNumber}
-        allianceWarriorsNumber={this.state.clearings[el].allianceWarriorsNumber}
-        onClearingClick={this.onClearingClick}
-        children={slots}
+    const clearingElements = [];
+
+    for (let el of this.props.clearings) {
+      clearingElements.push(<ClearingComponent
+        id={el.id}
+        key={el.id}
       />);
     }
     return (
       <div className='row m-0 h-100 w-100'>
-        <div className='col-9 p-0'>
+        <div className='col-xl-9 p-0'>
           <div style={backgroundStyle}>
-            {elements}
-            {this.getActionDialogElement()}
+            {clearingElements}
           </div>
         </div>
-        <div className='col-3 p-0'>
+        <div
+          style={{
+            'maxHeight': '100vh',
+            'overflowY': 'scroll'
+          }}
+          className='col-xl-3 p-0'>
           <button onClick={this.openModal}>Open Modal</button>
+          <button onClick={this.onMoveClick}>Move</button>
+          <button>Battle</button>
+          <button>Build</button>
+          {this.getCardsModal()}
           <Modal
             isOpen={this.state.modalIsOpen}
             onRequestClose={this.closeModal}
             style={customStyles}
             contentLabel="Example Modal"
           >
-            {this.getTabletElement()}
           </Modal>
         </div>
+
       </div>
     );
   };
 }
 
+const mapStateToProps = (state: AppState): IAppProps => ({
+  clearings: state.clearingsReducer.ids.map(id => state.clearingsReducer.byId[id]),
+  faction: Faction.MarquiseDeCat
+})
+
+export default connect(mapStateToProps)(App);
