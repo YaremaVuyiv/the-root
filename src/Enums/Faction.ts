@@ -1,4 +1,4 @@
-export enum Faction{
+export enum Faction {
     MarquiseDeCat,
     EyrieDynasties,
     WoodlandAllianse

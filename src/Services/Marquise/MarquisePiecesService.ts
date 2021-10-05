@@ -1,56 +1,43 @@
 import { Faction } from "../../Enums/Faction";
-import { SlotTypeEnum } from "../../Enums/SlotTypeEnum";
-import { getClearingById } from "../../store/Selectors";
-import { store } from "../../store/store"
+import { AppState, store } from "../../store/store"
+import getFactionBySlotType from "../SlotFactionService";
 
-const getClearingPiecesCount = (clearingId: number, faction: Faction, buildingTypes: SlotTypeEnum[]): number => {
-    const clearing = getClearingById(clearingId);
-    const warriorsCount = clearing.warriors
-        .filter(warrior => warrior.type === faction)
-        .length;
-    const slots = clearing.slotIds.map(id => store.getState().slotsReducer.byId[id]);
-    const marquiseBuildingsCount = slots.filter(x =>
-        buildingTypes.includes(x.type))
-        .length;
-
-    return warriorsCount + marquiseBuildingsCount;
+interface IClearingPieces {
+    faction: Faction,
+    piecesCount: number
 }
 
-export interface FactionPiecesCountService {
-    getClearingPiecesCount(clearingId: number): number;
+const getClearingPiecesCount = (clearingId: number): Map<Faction, number> => {
+    const storeState: AppState = store.getState();
+    const map = new Map<Faction, number>();
+
+    const warriors: IClearingPieces[] = storeState.clearingWarriorsReducer.ids.map(id => storeState.clearingWarriorsReducer.byId[id])
+            .filter(x => x.clearingId === clearingId && x.warriorsNumber > 0)
+            .map(x => {
+                return {
+                    faction: x.faction,
+                    piecesCount: x.warriorsNumber
+                }
+            });
+
+    const buildings: IClearingPieces[] = storeState.slotsReducer.ids.map(id => storeState.slotsReducer.byId[id])
+            .filter(x => x.clearingId === clearingId && x.type !== null)
+            .map(x => {
+                return {
+                    faction: getFactionBySlotType(x.type)!,
+                    piecesCount: 1
+                }
+            });
+
+    warriors.forEach(x => {
+        map.set(x.faction, (map.get(x.faction) ?? 0) + x.piecesCount);
+    });
+
+    buildings.forEach(x => {
+        map.set(x.faction, (map.get(x.faction) ?? 0) + x.piecesCount);
+    });
+
+    return map;
 }
 
-class MarquisePiecesService implements FactionPiecesCountService {
-    public getClearingPiecesCount(clearingId: number): number {
-        return getClearingPiecesCount(clearingId, Faction.MarquiseDeCat, [SlotTypeEnum.recruiter, SlotTypeEnum.sawmill, SlotTypeEnum.workshop]);
-    }
-}
-
-class EyriePiecesService implements FactionPiecesCountService {
-    public getClearingPiecesCount(clearingId: number): number {
-        return getClearingPiecesCount(clearingId, Faction.EyrieDynasties, [SlotTypeEnum.nest]);
-    }
-}
-
-class WoodlandAlliansePiecesService implements FactionPiecesCountService {
-    public getClearingPiecesCount(clearingId: number): number {
-        return getClearingPiecesCount(clearingId, Faction.WoodlandAllianse, [SlotTypeEnum.ruin]);
-    }
-}
-
-const marquisePiecesService: FactionPiecesCountService = new MarquisePiecesService();
-const eyriePiecesService: FactionPiecesCountService = new EyriePiecesService();
-const woodlandAlliansePiecesService: FactionPiecesCountService = new WoodlandAlliansePiecesService();
-
-export function FactionPiecesServiceFactory(faction: Faction): FactionPiecesCountService {
-    switch (faction) {
-        case Faction.MarquiseDeCat:
-            return marquisePiecesService;
-        case Faction.EyrieDynasties:
-            return eyriePiecesService;
-        case Faction.WoodlandAllianse:
-            return woodlandAlliansePiecesService;
-        default:
-            return marquisePiecesService;
-    }
-}
+export default getClearingPiecesCount;

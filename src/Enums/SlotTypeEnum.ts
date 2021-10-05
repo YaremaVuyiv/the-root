@@ -1,8 +1,12 @@
-export enum SlotTypeEnum{
-    sawmill,
+export type SlotTypeEnum = BuildingTypeEnum | RuinTypeEnum;
+
+export enum BuildingTypeEnum {
+    sawmill = 1,
     recruiter,
     workshop,
-    nest,
-    ruin,
-    empty
+    nest
+}
+
+export enum RuinTypeEnum {
+    ruin
 }

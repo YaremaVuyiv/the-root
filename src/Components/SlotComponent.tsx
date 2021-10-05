@@ -1,75 +1,37 @@
 import React from "react";
-import sawmillImage from "../Assets/sawmill.png";
-import workshopImage from "../Assets/workshop.png";
-import recruiterImage from "../Assets/recruiter.png";
-import nestImage from "../Assets/nest.png";
-import ruinImage from "../Assets/ruin.png";
 import { SlotTypeEnum } from "../Enums/SlotTypeEnum";
 import { AppState } from "../store/store";
-import { connect } from "react-redux";
+import { useSelector } from "react-redux";
+import GetImageNameBySlotType from "../Services/SlotImageService";
 
 interface ISlotProps {
-    id: string;
-    left: number;
-    top: number;
-    type?: SlotTypeEnum;
+    slotId: number
 }
 
-interface OwnProps {
-    id: number
-}
+export default function SlotComponent(props: ISlotProps) {
+    const side: number = 25;
 
-function mapStateToProps(state: AppState, ownProps: OwnProps): ISlotProps {
-    const slot = state.slotsReducer.byId[ownProps.id];
+    const leftPosition: number = useSelector((storeState: AppState) =>
+        storeState.slotsReducer.byId[props.slotId].left);
 
-    return {
-        id: 'slot' + slot.id,
-        left: slot.left,
-        top: slot.top,
-        type: slot.type
-    };
-}
+    const topPosition: number = useSelector((storeState: AppState) =>
+        storeState.slotsReducer.byId[props.slotId].top);
 
-const side: number = 25;
+    const slotType: SlotTypeEnum | null = useSelector((storeState: AppState) =>
+        storeState.slotsReducer.byId[props.slotId].type);
 
-class SlotComponent extends React.Component<ISlotProps>{
-    render() {
-        let image = "";
-        switch (this.props.type) {
-            case SlotTypeEnum.nest:
-                image = nestImage;
-                break;
-            case SlotTypeEnum.recruiter:
-                image = recruiterImage;
-                break;
-            case SlotTypeEnum.sawmill:
-                image = sawmillImage;
-                break;
-            case SlotTypeEnum.workshop:
-                image = workshopImage;
-                break;
-            case SlotTypeEnum.ruin:
-                image = ruinImage;
-                break;
-            default:
-                break;
-        }
-
-        const buildingStyle = {
-            width: side + '%',
-            height: side + '%',
-            left: this.props.left + '%',
-            top: this.props.top + '%',
-            position: 'absolute' as 'absolute',
-            backgroundImage: `url(${image})`,
-            backgroundSize: 'contain',
-            backgroundRepeat: 'no-repeat',
-        }
-
-        return (
-            <div style={buildingStyle}></div>
-        )
+    const buildingStyle = {
+        width: side + '%',
+        height: side + '%',
+        left: leftPosition + '%',
+        top: topPosition + '%',
+        position: 'absolute' as 'absolute',
+        backgroundImage: `url(${GetImageNameBySlotType(slotType)})`,
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
     }
-}
 
-export default connect(mapStateToProps)(SlotComponent);
+    return (
+        <div style={buildingStyle}></div>
+    )
+}

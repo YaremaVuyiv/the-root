@@ -4,11 +4,11 @@ import './index.css';
 import * as serviceWorker from './serviceWorker';
 import { store } from './store/store';
 import { Provider } from 'react-redux';
-import App from './App';
-
+import { App } from './App';
+import { Faction } from './Enums/Faction';
 ReactDOM.render(
     <Provider store={store}>
-        <App/>
+        <App faction={Faction.MarquiseDeCat}/>
     </Provider>, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change

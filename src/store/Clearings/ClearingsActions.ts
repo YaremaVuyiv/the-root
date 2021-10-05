@@ -1,15 +1,21 @@
 import { ACTIVATE_CLEARINGS, ClearingActionsType, DEACTIVATE_CLEARINGS, SELECT_CLEAING } from "./models/actions"
+import { SelectedClearingEnum } from "./models/ClearingsState";
 
-export const activateClearingsAction = (clearingIds: number[]): ClearingActionsType => ({
+export const activateClearingsAction = (clearingIds: number[], clearingActionType: SelectedClearingEnum): ClearingActionsType => ({
     type: ACTIVATE_CLEARINGS,
-    payload: clearingIds
+    payload: {
+        clearingIds,
+        clearingActionType
+    }
 });
 
 export const deactivateClearingsAction = (): ClearingActionsType => ({
     type: DEACTIVATE_CLEARINGS
 });
 
-export const selectClearingAction = (id: number): ClearingActionsType => ({
+export const selectClearingAction = (clearingId: number): ClearingActionsType => ({
     type: SELECT_CLEAING,
-    id: id
+    payload: {
+        clearingId: clearingId
+    }
 })

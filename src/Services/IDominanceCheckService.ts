@@ -1,36 +1,40 @@
 import { Faction } from "../Enums/Faction";
-import { getAllFactions } from "../store/Selectors";
-import { FactionPiecesCountService, FactionPiecesServiceFactory } from "./Marquise/MarquisePiecesService";
+import getClearingPiecesCount from "./Marquise/MarquisePiecesService";
 
-interface IDominanceCheckService {
-    isDominating(clearingId: number, faction: Faction): boolean;
+type DominantFactionType = {
+    faction: Faction,
+    piecesCount: number
 }
 
-class DominanceCheckService implements IDominanceCheckService {
-    public isDominating(clearingId: number, faction: Faction): boolean {
-        let factionPiecesService: FactionPiecesCountService = FactionPiecesServiceFactory(faction);
-        const factionPiecesCount: number = factionPiecesService.getClearingPiecesCount(clearingId);
+const isFactionDominant = (clearingId: number, faction: Faction): boolean => {
+    return false;
+}
 
-        if (factionPiecesCount <= 0) {
-            return false;
-        }
+const getDominantFactionInClearing = (clearingId: number): Faction | null => {
+    const factionsMap = getClearingPiecesCount(clearingId)
 
-        const factions = getAllFactions();
-        let isDominating: boolean = true;
-        factions.forEach(currentFaction => {
-            if (currentFaction.faction !== faction) {
+    const factions = Array.from(factionsMap.keys());
+    if (factions.length === 0) return null;
 
-                factionPiecesService = FactionPiecesServiceFactory(currentFaction.faction);
-                const currentFactionPiecesCount = factionPiecesService.getClearingPiecesCount(clearingId);
+    const list: DominantFactionType[] = factions
+        .map(faction => {
+            const factionPiecesCount: number = factionsMap.get(faction)!;
 
-                if (currentFactionPiecesCount >= factionPiecesCount) {
-                    isDominating = false;
-                }
+            const dominantFaction: DominantFactionType = {
+                faction: faction,
+                piecesCount: factionPiecesCount
             }
-        })
 
-        return isDominating;
-    }
+            return dominantFaction;
+        })
+        .sort((x1, x2) => x2.piecesCount - x1.piecesCount)
+        .filter((x, index, array) => x.piecesCount === array[0].piecesCount);
+
+    if (list.length === 1) return list[0].faction;
+
+    if (list.find(x => x.faction === Faction.EyrieDynasties)) return Faction.EyrieDynasties;
+
+    return null;
 }
 
-export const dominanceCheckService: IDominanceCheckService = new DominanceCheckService();
+export default getDominantFactionInClearing;
